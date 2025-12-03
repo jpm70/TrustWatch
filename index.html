@@ -220,7 +220,6 @@
         // Se usa HTTPS para evitar el error de "Contenido Mixto"
         const IP_API_URL = "https://ip-api.com/json/"; 
         const GOOGLE_DNS_API_URL = "https://dns.google/resolve";
-        // DOMAIN_API_URL eliminado por problemas de CORS/API Key.
 
         // --- ESTADO DE LA APLICACIÓN ---
         let currentTab = 'email';
@@ -358,7 +357,8 @@
 
             } catch (error) {
                 console.error("Error en la solicitud Fetch (Email):", error);
-                displayMessage("❌ Error de red o en la solicitud. Revisa la consola para más detalles.", 'bg-red-100 border-red-400 text-red-700');
+                // Mensaje de error más descriptivo sobre el bloqueo de red
+                displayMessage(`❌ Error de Conexión. Es probable que la API de brechas esté bloqueada por las políticas de seguridad del navegador o el entorno de sandbox (CORS).`, 'bg-red-100 border-red-400 text-red-700');
             } finally {
                 if (searchButton) searchButton.disabled = false;
                 if (buttonText) buttonText.textContent = 'Comprobar Brechas';
@@ -558,7 +558,8 @@
 
             } catch (error) {
                 console.error("Error en la solicitud Fetch (IP):", error);
-                displayMessage("❌ Error de red o en la solicitud. Revisa la consola para más detalles.", 'bg-red-100 border-red-400 text-red-700');
+                // **CORRECCIÓN:** Mensaje de error más explícito para NetworkError/CORS.
+                displayMessage(`❌ Error de Conexión. Es probable que la API de geolocalización esté bloqueada por las políticas de seguridad del navegador o el entorno de sandbox (CORS).`, 'bg-red-100 border-red-400 text-red-700');
             } finally {
                 if (searchButton) searchButton.disabled = false;
                 if (buttonText) buttonText.textContent = 'Geolocalizar IP';
@@ -639,7 +640,8 @@
 
             } catch (error) {
                 console.error("Error en la solicitud Fetch (DNS):", error);
-                displayMessage("❌ Error de red o en la solicitud. Revisa la consola para más detalles.", 'bg-red-100 border-red-400 text-red-700');
+                // Mensaje de error más descriptivo sobre el bloqueo de red
+                displayMessage(`❌ Error de Conexión. Es probable que la API de DNS esté bloqueada por las políticas de seguridad del navegador o el entorno de sandbox (CORS).`, 'bg-red-100 border-red-400 text-red-700');
             } finally {
                 if (searchButton) searchButton.disabled = false;
                 if (buttonText) buttonText.textContent = 'Buscar Registros DNS';
