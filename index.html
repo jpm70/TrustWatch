@@ -216,7 +216,7 @@
     <script>
         // --- CONSTANTES GLOBALES ---
         const XPOSED_API_URL = "https://exposedornot.com/api/v1/search";
-        // CORRECCIÓN: Se cambió de http a https para evitar el error de "Contenido Mixto"
+        // CORRECCIÓN de la API de IP: Se cambió de http a https para evitar el error de "Contenido Mixto"
         const IP_API_URL = "https://ip-api.com/json/"; 
         const DOMAIN_API_URL = "https://www.whoisxmlapi.com/domain-name-availability/api/v1/lookup";
         const GOOGLE_DNS_API_URL = "https://dns.google/resolve";
@@ -225,6 +225,13 @@
         let currentTab = 'email';
 
         // --- FUNCIONES DE UTILIDAD GENERAL ---
+
+        /**
+         * Función auxiliar para capitalizar la primera letra de una cadena.
+         */
+        function capitalize(s) {
+            return s.charAt(0).toUpperCase() + s.slice(1);
+        }
 
         /**
          * Cambia la pestaña visible y actualiza el estado de la aplicación.
@@ -236,11 +243,28 @@
             // 1. Ocultar todos los contenidos y desactivar botones
             document.querySelectorAll('[data-tab-content]').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.tab-button').forEach(el => el.classList.remove('active'));
-            document.getElementById('results').innerHTML = ''; // Limpiar resultados
+            // document.getElementById('results') siempre debe existir, pero es buena práctica verificar
+            const resultsDiv = document.getElementById('results');
+            if (resultsDiv) {
+                resultsDiv.innerHTML = ''; // Limpiar resultados
+            }
 
             // 2. Mostrar contenido y activar el botón correcto
-            document.getElementById(`tabContent${capitalize(tabName)}`).classList.remove('hidden');
-            document.getElementById(`tab${capitalize(tabName)}`).classList.add('active');
+            // Se añaden comprobaciones de nulidad para evitar el 'TypeError: ... is null' reportado
+            const contentDiv = document.getElementById(`tabContent${capitalize(tabName)}`);
+            const buttonEl = document.getElementById(`tab${capitalize(tabName)}`);
+
+            if (contentDiv) {
+                contentDiv.classList.remove('hidden');
+            } else {
+                console.warn(`[DOM Warning] No se encontró el contenido para la pestaña: tabContent${capitalize(tabName)}`);
+            }
+            
+            if (buttonEl) {
+                buttonEl.classList.add('active');
+            } else {
+                console.warn(`[DOM Warning] No se encontró el botón para la pestaña: tab${capitalize(tabName)}`);
+            }
         }
 
         /**
@@ -250,18 +274,13 @@
          */
         function displayMessage(message, classes) {
             const resultsDiv = document.getElementById('results');
-            resultsDiv.innerHTML = `
-                <div class="${classes} p-4 rounded-lg border-l-4 shadow-sm" role="alert">
-                    <p class="font-medium">${message}</p>
-                </div>
-            `;
-        }
-
-        /**
-         * Función auxiliar para capitalizar la primera letra de una cadena.
-         */
-        function capitalize(s) {
-            return s.charAt(0).toUpperCase() + s.slice(1);
+            if (resultsDiv) { // Verificación de nulidad para mayor seguridad
+                resultsDiv.innerHTML = `
+                    <div class="${classes} p-4 rounded-lg border-l-4 shadow-sm" role="alert">
+                        <p class="font-medium">${message}</p>
+                    </div>
+                `;
+            }
         }
 
         /**
@@ -269,6 +288,8 @@
          */
         function copyToClipboard(elementId) {
             const element = document.getElementById(elementId);
+            if (!element) return;
+            
             // Crea un input temporal para la selección
             const tempInput = document.createElement('textarea');
             tempInput.value = element.value || element.textContent; // Puede ser un input o un texto div
@@ -297,7 +318,7 @@
 
         async function checkBreaches() {
             const emailInput = document.getElementById('emailInput');
-            const email = emailInput.value.trim();
+            const email = emailInput ? emailInput.value.trim() : '';
             const searchButton = document.getElementById('searchButtonEmail');
             const buttonText = document.getElementById('buttonTextEmail');
             const loader = document.getElementById('loaderEmail');
@@ -309,9 +330,9 @@
                 return;
             }
             
-            searchButton.disabled = true;
-            buttonText.textContent = 'Buscando...';
-            loader.classList.remove('hidden');
+            if (searchButton) searchButton.disabled = true;
+            if (buttonText) buttonText.textContent = 'Buscando...';
+            if (loader) loader.classList.remove('hidden');
 
             const searchUrl = `${XPOSED_API_URL}/${encodeURIComponent(email)}`;
 
@@ -338,9 +359,9 @@
                 console.error("Error en la solicitud Fetch (Email):", error);
                 displayMessage("❌ Error de red o en la solicitud. Revisa la consola para más detalles.", 'bg-red-100 border-red-400 text-red-700');
             } finally {
-                searchButton.disabled = false;
-                buttonText.textContent = 'Comprobar Brechas';
-                loader.classList.add('hidden');
+                if (searchButton) searchButton.disabled = false;
+                if (buttonText) buttonText.textContent = 'Comprobar Brechas';
+                if (loader) loader.classList.add('hidden');
             }
         }
 
@@ -379,7 +400,7 @@
                 `;
             });
 
-            resultsDiv.innerHTML = html;
+            if (resultsDiv) resultsDiv.innerHTML = html;
         }
 
 
@@ -392,10 +413,10 @@
          */
         function checkPhone() {
             const phoneInput = document.getElementById('phoneInput');
-            const number = phoneInput.value.trim();
+            const number = phoneInput ? phoneInput.value.trim() : '';
             const resultsDiv = document.getElementById('results');
 
-            resultsDiv.innerHTML = '';
+            if (resultsDiv) resultsDiv.innerHTML = '';
 
             if (number === '') {
                 displayMessage("⚠️ Por favor, introduce un número de teléfono.", 'bg-yellow-100 border-yellow-400 text-yellow-700');
@@ -421,7 +442,7 @@
                         </div>
                         <p class="text-xs text-gray-400 mt-4 italic">Nota: Esta es una validación de formato (sintáctica y geográfica), no comprueba si el número está activo.</p>
                     `;
-                    resultsDiv.innerHTML = html;
+                    if (resultsDiv) resultsDiv.innerHTML = html;
                 } else {
                     displayMessage(`❌ El número <span class="font-bold">${number}</span> no es un número de teléfono válido o no se pudo determinar su país. Asegúrate de incluir el código de país (ej. +34).`, 'bg-red-100 border-red-400 text-red-700');
                 }
@@ -443,7 +464,7 @@
 
         async function checkDomainInfo() {
             const domainInput = document.getElementById('domainInput');
-            const domain = domainInput.value.trim();
+            const domain = domainInput ? domainInput.value.trim() : '';
             const searchButton = document.getElementById('searchButtonDomain');
             const buttonText = document.getElementById('buttonTextDomain');
             const loader = document.getElementById('loaderDomain');
@@ -455,9 +476,9 @@
                 return;
             }
 
-            searchButton.disabled = true;
-            buttonText.textContent = 'Buscando...';
-            loader.classList.remove('hidden');
+            if (searchButton) searchButton.disabled = true;
+            if (buttonText) buttonText.textContent = 'Buscando...';
+            if (loader) loader.classList.remove('hidden');
 
             const searchUrl = `${DOMAIN_API_URL}?domainName=${encodeURIComponent(domain)}`;
 
@@ -480,9 +501,9 @@
                 console.error("Error en la solicitud Fetch (Dominio):", error);
                 displayMessage("❌ Error de red o en la solicitud. Revisa la consola para más detalles.", 'bg-red-100 border-red-400 text-red-700');
             } finally {
-                searchButton.disabled = false;
-                buttonText.textContent = 'Buscar Dominio';
-                loader.classList.add('hidden');
+                if (searchButton) searchButton.disabled = false;
+                if (buttonText) buttonText.textContent = 'Buscar Dominio';
+                if (loader) loader.classList.add('hidden');
             }
         }
 
@@ -518,7 +539,7 @@
                     </p>
                 `;
             }
-            resultsDiv.innerHTML = html;
+            if (resultsDiv) resultsDiv.innerHTML = html;
         }
 
 
@@ -535,7 +556,7 @@
 
         async function checkIPGeoloc() {
             const ipInput = document.getElementById('ipInput');
-            const ip = ipInput.value.trim();
+            const ip = ipInput ? ipInput.value.trim() : '';
             const searchButton = document.getElementById('searchButtonIP');
             const buttonText = document.getElementById('buttonTextIP');
             const loader = document.getElementById('loaderIP');
@@ -547,9 +568,9 @@
                 return;
             }
 
-            searchButton.disabled = true;
-            buttonText.textContent = 'Buscando...';
-            loader.classList.remove('hidden');
+            if (searchButton) searchButton.disabled = true;
+            if (buttonText) buttonText.textContent = 'Buscando...';
+            if (loader) loader.classList.remove('hidden');
 
             // Se usa HTTPS para evitar errores de Contenido Mixto (Mixed Content)
             const searchUrl = `${IP_API_URL}${encodeURIComponent(ip)}`;
@@ -573,15 +594,16 @@
                 console.error("Error en la solicitud Fetch (IP):", error);
                 displayMessage("❌ Error de red o en la solicitud. Revisa la consola para más detalles.", 'bg-red-100 border-red-400 text-red-700');
             } finally {
-                searchButton.disabled = false;
-                buttonText.textContent = 'Geolocalizar IP';
-                loader.classList.add('hidden');
+                if (searchButton) searchButton.disabled = false;
+                if (buttonText) buttonText.textContent = 'Geolocalizar IP';
+                if (loader) loader.classList.add('hidden');
             }
         }
         
         function displayIPResult(data) {
             const resultsDiv = document.getElementById('results');
-            const isUserIP = !document.getElementById('ipInput').value.trim();
+            const ipInput = document.getElementById('ipInput');
+            const isUserIP = ipInput ? !ipInput.value.trim() : true;
 
             let html = `
                 <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 rounded-lg shadow-md mb-6" role="alert">
@@ -603,7 +625,7 @@
                 </div>
                 <p class="text-xs text-gray-400 mt-4 italic">La precisión de la geolocalización de IPs varía y a menudo solo apunta a la ciudad o región, no a la ubicación exacta.</p>
             `;
-            resultsDiv.innerHTML = html;
+            if (resultsDiv) resultsDiv.innerHTML = html;
         }
 
         // ----------------------------------------------------------------------
@@ -613,8 +635,8 @@
         async function checkDnsRecords() {
             const dnsInput = document.getElementById('dnsInput');
             const dnsTypeSelect = document.getElementById('dnsTypeSelect');
-            const domain = dnsInput.value.trim();
-            const recordType = dnsTypeSelect.value.trim();
+            const domain = dnsInput ? dnsInput.value.trim() : '';
+            const recordType = dnsTypeSelect ? dnsTypeSelect.value.trim() : 'A';
             const searchButton = document.getElementById('searchButtonDns');
             const buttonText = document.getElementById('buttonTextDns');
             const loader = document.getElementById('loaderDns');
@@ -626,9 +648,9 @@
                 return;
             }
 
-            searchButton.disabled = true;
-            buttonText.textContent = 'Buscando...';
-            loader.classList.remove('hidden');
+            if (searchButton) searchButton.disabled = true;
+            if (buttonText) buttonText.textContent = 'Buscando...';
+            if (loader) loader.classList.remove('hidden');
 
             const searchUrl = `${GOOGLE_DNS_API_URL}?name=${encodeURIComponent(domain)}&type=${encodeURIComponent(recordType)}`;
 
@@ -653,9 +675,9 @@
                 console.error("Error en la solicitud Fetch (DNS):", error);
                 displayMessage("❌ Error de red o en la solicitud. Revisa la consola para más detalles.", 'bg-red-100 border-red-400 text-red-700');
             } finally {
-                searchButton.disabled = false;
-                buttonText.textContent = 'Buscar Registros DNS';
-                loader.classList.add('hidden');
+                if (searchButton) searchButton.disabled = false;
+                if (buttonText) buttonText.textContent = 'Buscar Registros DNS';
+                if (loader) loader.classList.add('hidden');
             }
         }
 
@@ -692,7 +714,7 @@
                     </p>
                 `;
             }
-            resultsDiv.innerHTML = html;
+            if (resultsDiv) resultsDiv.innerHTML = html;
         }
 
         // ----------------------------------------------------------------------
@@ -708,11 +730,12 @@
          * Genera una contraseña aleatoria.
          */
         function generatePassword() {
-            const length = parseInt(document.getElementById('passLength').value);
-            const useUppercase = document.getElementById('passUppercase').checked;
-            const useLowercase = document.getElementById('passLowercase').checked;
-            const useNumbers = document.getElementById('passNumbers').checked;
-            const useSymbols = document.getElementById('passSymbols').checked;
+            const lengthInput = document.getElementById('passLength');
+            const length = lengthInput ? parseInt(lengthInput.value) : 16;
+            const useUppercase = document.getElementById('passUppercase')?.checked;
+            const useLowercase = document.getElementById('passLowercase')?.checked;
+            const useNumbers = document.getElementById('passNumbers')?.checked;
+            const useSymbols = document.getElementById('passSymbols')?.checked;
 
             let characters = '';
             let password = '';
@@ -725,7 +748,8 @@
             // Si no se selecciona ningún tipo de caracter, se usa minúsculas por defecto.
             if (characters.length === 0) {
                 characters = lowercase;
-                document.getElementById('passLowercase').checked = true;
+                const lowerCheck = document.getElementById('passLowercase');
+                if (lowerCheck) lowerCheck.checked = true;
             }
 
             for (let i = 0; i < length; i++) {
@@ -733,7 +757,9 @@
                 password += characters.charAt(randomIndex);
             }
 
-            document.getElementById('generatedPassword').value = password;
+            const generatedInput = document.getElementById('generatedPassword');
+            if (generatedInput) generatedInput.value = password;
+            
             // Después de generar, evaluamos su fuerza
             checkPasswordStrength(password);
         }
@@ -742,14 +768,23 @@
          * Evalúa la fuerza de una contraseña (lógica simple de puntuación).
          */
         function checkPasswordStrength(inputPass = null) {
-            const password = inputPass !== null ? inputPass : document.getElementById('passwordStrengthInput').value;
+            const passwordInput = document.getElementById('passwordStrengthInput');
+            const password = inputPass !== null ? inputPass : (passwordInput ? passwordInput.value : '');
             const resultsDiv = document.getElementById('results');
-            resultsDiv.innerHTML = '';
+            
+            if (resultsDiv && currentTab !== 'password') resultsDiv.innerHTML = '';
+
+            const strengthIndicator = document.getElementById('strengthIndicator');
+            const strengthTextEl = document.getElementById('strengthText');
 
             if (password.length === 0) {
-                document.getElementById('strengthIndicator').style.width = '0%';
-                document.getElementById('strengthIndicator').className = 'h-2 rounded-full transition-all duration-500';
-                document.getElementById('strengthText').textContent = 'Introduce una contraseña para evaluar.';
+                if (strengthIndicator) {
+                    strengthIndicator.style.width = '0%';
+                    strengthIndicator.className = 'h-2 rounded-full transition-all duration-500';
+                }
+                if (strengthTextEl) {
+                    strengthTextEl.textContent = 'Introduce una contraseña para evaluar.';
+                }
                 return;
             }
 
@@ -806,15 +841,20 @@
                 textColor = 'text-green-700';
             }
 
-            document.getElementById('strengthIndicator').style.width = `${score}%`;
-            document.getElementById('strengthIndicator').className = `h-2 rounded-full transition-all duration-500 ${indicatorClass}`;
-            document.getElementById('strengthText').innerHTML = `Fuerza: <span class="${textColor}">${strengthText}</span> (${score}%)`;
+            if (strengthIndicator) {
+                strengthIndicator.style.width = `${score}%`;
+                strengthIndicator.className = `h-2 rounded-full transition-all duration-500 ${indicatorClass}`;
+            }
+            if (strengthTextEl) {
+                strengthTextEl.innerHTML = `Fuerza: <span class="${textColor}">${strengthText}</span> (${score}%)`;
+            }
         }
 
         // Inicializar la aplicación al cargar
         document.addEventListener('DOMContentLoaded', () => {
             changeTab('email'); // Asegura que la pestaña de email esté activa por defecto
-            checkPasswordStrength(); // Inicializa el chequeo de fuerza al cargar
+            generatePassword(); // Genera una contraseña inicial
+            // checkPasswordStrength(); ya se llama dentro de generatePassword()
         });
     </script>
 </body>
