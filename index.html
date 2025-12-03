@@ -115,7 +115,7 @@
                        required>
                 <button id="searchButtonDomain" onclick="checkDomainInfo()"
                         class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out flex items-center justify-center">
-                    <span id="buttonTextDomain">Buscar Dominio</span>
+                    <span id="buttonTextDomain">Validar Formato</span>
                     <div id="loaderDomain" class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-6 w-6 hidden ml-2"></div>
                 </button>
             </div>
@@ -208,7 +208,8 @@
 
         <!-- Pie de página y Créditos -->
         <p class="text-xs text-gray-400 mt-8 text-center">
-            **Servicios externos gratuitos:** Brechas (XposedOrNot), Dominio (WhoisXMLAPI - solo validador), IP (IP-API), DNS (Google Public DNS). Teléfono y Contraseñas (Client-side JS).
+            **Servicios externos gratuitos:** Brechas (XposedOrNot), IP (IP-API), DNS (Google Public DNS). Teléfono y Contraseñas (Client-side JS).
+            <span class="font-bold text-red-400">La disponibilidad de Dominio se verifica solo a nivel de formato por las restricciones de CORS/API Key.</span>
         </p>
 
     </div>
@@ -216,10 +217,10 @@
     <script>
         // --- CONSTANTES GLOBALES ---
         const XPOSED_API_URL = "https://exposedornot.com/api/v1/search";
-        // CORRECCIÓN de la API de IP: Se cambió de http a https para evitar el error de "Contenido Mixto"
+        // Se usa HTTPS para evitar el error de "Contenido Mixto"
         const IP_API_URL = "https://ip-api.com/json/"; 
-        const DOMAIN_API_URL = "https://www.whoisxmlapi.com/domain-name-availability/api/v1/lookup";
         const GOOGLE_DNS_API_URL = "https://dns.google/resolve";
+        // DOMAIN_API_URL eliminado por problemas de CORS/API Key.
 
         // --- ESTADO DE LA APLICACIÓN ---
         let currentTab = 'email';
@@ -243,14 +244,14 @@
             // 1. Ocultar todos los contenidos y desactivar botones
             document.querySelectorAll('[data-tab-content]').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.tab-button').forEach(el => el.classList.remove('active'));
-            // document.getElementById('results') siempre debe existir, pero es buena práctica verificar
+            
             const resultsDiv = document.getElementById('results');
             if (resultsDiv) {
                 resultsDiv.innerHTML = ''; // Limpiar resultados
             }
 
             // 2. Mostrar contenido y activar el botón correcto
-            // Se añaden comprobaciones de nulidad para evitar el 'TypeError: ... is null' reportado
+            // Se añaden comprobaciones de nulidad para evitar el 'TypeError: ... is null'
             const contentDiv = document.getElementById(`tabContent${capitalize(tabName)}`);
             const buttonEl = document.getElementById(`tab${capitalize(tabName)}`);
 
@@ -462,84 +463,49 @@
             return re.test(String(domain).toLowerCase());
         }
 
-        async function checkDomainInfo() {
+        /**
+         * Verifica solo la validez del formato del dominio, ya que la disponibilidad
+         * en tiempo real falla por CORS/API Key.
+         */
+        function checkDomainInfo() {
             const domainInput = document.getElementById('domainInput');
             const domain = domainInput ? domainInput.value.trim() : '';
+
+            // Desactivar el botón y el loader no son necesarios ya que no hay fetch
+            // pero lo dejamos por consistencia si se cambiara a un fetch en el futuro.
             const searchButton = document.getElementById('searchButtonDomain');
-            const buttonText = document.getElementById('buttonTextDomain');
-            const loader = document.getElementById('loaderDomain');
+            if (searchButton) searchButton.disabled = true;
 
             document.getElementById('results').innerHTML = '';
 
             if (!isValidDomain(domain)) {
                 displayMessage("⚠️ Por favor, introduce un dominio válido (ej: google.com). No incluyas `http://` ni `www`.", 'bg-yellow-100 border-yellow-400 text-yellow-700');
+                if (searchButton) searchButton.disabled = false;
                 return;
             }
-
-            if (searchButton) searchButton.disabled = true;
-            if (buttonText) buttonText.textContent = 'Buscando...';
-            if (loader) loader.classList.remove('hidden');
-
-            const searchUrl = `${DOMAIN_API_URL}?domainName=${encodeURIComponent(domain)}`;
-
-            try {
-                const response = await fetch(searchUrl, {
-                    method: 'GET',
-                    headers: { "Accept": "application/json" }
-                });
-
-                const data = await response.json();
-
-                if (response.ok && data.domainAvailability) {
-                    displayDomainResult(domain, data);
-                } else {
-                    const message = data.messages?.[0]?.text || `Error ${response.status}: Error al consultar la información del dominio.`;
-                    displayMessage(`❌ Error: ${message}`, 'bg-red-100 border-red-400 text-red-700');
-                }
-
-            } catch (error) {
-                console.error("Error en la solicitud Fetch (Dominio):", error);
-                displayMessage("❌ Error de red o en la solicitud. Revisa la consola para más detalles.", 'bg-red-100 border-red-400 text-red-700');
-            } finally {
-                if (searchButton) searchButton.disabled = false;
-                if (buttonText) buttonText.textContent = 'Buscar Dominio';
-                if (loader) loader.classList.add('hidden');
-            }
-        }
-
-        function displayDomainResult(domain, data) {
-            const resultsDiv = document.getElementById('results');
-            const isAvailable = data.domainAvailability === 'AVAILABLE';
             
-            const statusText = isAvailable ? '¡Disponible para registro!' : 'REGISTRADO';
-            const statusClass = isAvailable ? 'bg-green-100 border-green-500 text-green-700' : 'bg-red-100 border-red-500 text-red-700';
+            // Simulación de resultado de validación de formato (Client-side)
+            const statusText = 'FORMATO VÁLIDO (Client-Side)';
+            const statusClass = 'bg-blue-100 border-blue-500 text-blue-700';
 
             let html = `
                 <div class="${statusClass} border-l-4 p-4 rounded-lg shadow-md mb-6" role="alert">
                     <p class="font-bold text-lg">🌐 Dominio: <span class="font-extrabold">${domain}</span></p>
                     <p class="text-sm">Estado: <span class="font-bold">${statusText}</span></p>
                 </div>
+                <p class="p-4 bg-gray-50 text-gray-600 rounded-xl shadow-inner">
+                    ✅ El formato del dominio es estructuralmente correcto.
+                </p>
+                <div class="mt-4 p-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 rounded-lg">
+                    <p class="font-semibold">⚠️ Nota Importante sobre Disponibilidad:</p>
+                    <p class="text-sm">La comprobación de disponibilidad o WHOIS de dominios en tiempo real fue desactivada debido a que fallaba constantemente por las restricciones de CORS/API Key de los servicios externos.</p>
+                    <p class="text-sm mt-1">Esta herramienta solo confirma que el *formato* del dominio es correcto. Para disponibilidad real, utiliza un registrador de dominios.</p>
+                </div>
             `;
-
-            if (!isAvailable) {
-                html += `
-                    <h2 class="text-xl font-semibold text-gray-700 mb-4">Detalles Básicos del Registro:</h2>
-                    <div class="bg-white p-4 rounded-xl shadow border border-gray-200 space-y-2">
-                        <p><strong>Fecha de Creación:</strong> ${data.createdDate || 'N/A'}</p>
-                        <p><strong>Fecha de Expiración:</strong> ${data.expiresDate || 'N/A'}</p>
-                        <p><strong>Organización del Registrante:</strong> ${data.registrantOrganization || 'No disponible públicamente'}</p>
-                        <p><strong>Servidor WHOIS:</strong> ${data.whoisServer || 'N/A'}</p>
-                    </div>
-                `;
-                html += `<p class="text-xs text-gray-400 mt-4 italic">Nota: Para ver la información completa (WHOIS), se requeriría una API key de pago.</p>`;
-            } else {
-                html += `
-                    <p class="p-4 bg-gray-50 text-gray-600 rounded-xl shadow-inner">
-                        Este dominio está libre. ¡Si te interesa, regístralo pronto!
-                    </p>
-                `;
-            }
+            const resultsDiv = document.getElementById('results');
             if (resultsDiv) resultsDiv.innerHTML = html;
+
+            if (searchButton) searchButton.disabled = false;
         }
 
 
