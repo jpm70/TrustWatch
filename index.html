@@ -208,7 +208,7 @@
 
         <!-- Pie de página y Créditos -->
         <p class="text-xs text-gray-400 mt-8 text-center">
-            **Servicios externos gratuitos:** Brechas (XposedOrNot), IP (IP-API), DNS (Google Public DNS). Teléfono y Contraseñas (Client-side JS).
+            **Servicios externos gratuitos:** Brechas (XposedOrNot), IP (ipwhois.app), DNS (Google Public DNS). Teléfono y Contraseñas (Client-side JS).
             <span class="font-bold text-red-400">La disponibilidad de Dominio se verifica solo a nivel de formato por las restricciones de CORS/API Key.</span>
         </p>
 
@@ -217,8 +217,8 @@
     <script>
         // --- CONSTANTES GLOBALES ---
         const XPOSED_API_URL = "https://exposedornot.com/api/v1/search";
-        // Se usa HTTPS para evitar el error de "Contenido Mixto"
-        const IP_API_URL = "https://ip-api.com/json/"; 
+        // CAMBIO CRÍTICO: Se cambia de ip-api.com (que falla con HTTPS gratuito) a ipwhois.app
+        const IP_API_URL = "https://ipwhois.app/json/"; 
         const GOOGLE_DNS_API_URL = "https://dns.google/resolve";
 
         // --- ESTADO DE LA APLICACIÓN ---
@@ -228,7 +228,6 @@
 
         /**
          * Función auxiliar para capitalizar la primera letra de una cadena, manejando acrónimos.
-         * CORRECCIÓN: Asegura que 'ip' se convierta en 'IP' para que coincida con el ID del DOM.
          */
         function capitalize(s) {
             if (s.toLowerCase() === 'ip') return 'IP';
@@ -542,8 +541,8 @@
             if (buttonText) buttonText.textContent = 'Buscando...';
             if (loader) loader.classList.remove('hidden');
 
-            // Se usa HTTPS para evitar errores de Contenido Mixto (Mixed Content)
-            const searchUrl = `${IP_API_URL}${encodeURIComponent(ip)}`;
+            // Nueva API: ipwhois.app. Si se proporciona una IP, se añade a la URL. Si no, usa la IP del cliente.
+            const searchUrl = `${IP_API_URL}${encodeURIComponent(ip)}`; 
 
             try {
                 const response = await fetch(searchUrl, {
@@ -553,17 +552,18 @@
 
                 const data = await response.json();
 
-                if (data.status === 'success') {
+                // La nueva API usa 'success' booleano
+                if (data.success === true) {
                     displayIPResult(data);
                 } else {
-                    const message = data.message || `Error: La dirección IP <span class="font-bold">${ip || 'del usuario'}</span> no es válida o no pudo ser geolocalizada.`;
+                    const message = data.message || `Error: La dirección IP <span class="font-bold">${data.ip || ip || 'del usuario'}</span> no es válida o no pudo ser geolocalizada.`;
                     displayMessage(`❌ Error: ${message}`, 'bg-red-100 border-red-400 text-red-700');
                 }
 
             } catch (error) {
                 console.error("Error en la solicitud Fetch (IP):", error);
                 // Mensaje de error más explícito para NetworkError/CORS.
-                displayMessage(`❌ Error de Conexión. Es probable que la API de geolocalización esté bloqueada por las políticas de seguridad del navegador o el entorno de sandbox (CORS).`, 'bg-red-100 border-red-400 text-red-700');
+                displayMessage(`❌ Error de Conexión. Es probable que haya un problema de red o que el servicio de geolocalización haya fallado.`, 'bg-red-100 border-red-400 text-red-700');
             } finally {
                 if (searchButton) searchButton.disabled = false;
                 if (buttonText) buttonText.textContent = 'Geolocalizar IP';
@@ -576,22 +576,37 @@
             const ipInput = document.getElementById('ipInput');
             const isUserIP = ipInput ? !ipInput.value.trim() : true;
 
+            // Mapeo de campos de la nueva API (ipwhois.app)
+            const ipAddress = data.ip;
+            const country = data.country;
+            const countryCode = data.country_code;
+            const regionName = data.region;
+            const regionCode = data.region_code;
+            const city = data.city;
+            const zip = data.postal;
+            const lat = data.latitude;
+            const lon = data.longitude;
+            const timezone = data.timezone;
+            const isp = data.isp;
+            const org = data.org;
+            const as = data.asn; // Autonomous System
+
             let html = `
                 <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 rounded-lg shadow-md mb-6" role="alert">
                     <p class="font-bold text-lg">📍 Geolocalización de IP</p>
-                    <p class="text-sm">IP: <span class="font-extrabold">${data.query}</span> ${isUserIP ? '(Tu IP actual)' : ''}</p>
+                    <p class="text-sm">IP: <span class="font-extrabold">${ipAddress}</span> ${isUserIP ? '(Tu IP actual)' : ''}</p>
                 </div>
                 <h2 class="text-xl font-semibold text-gray-700 mb-4">Detalles Geográficos y de Red:</h2>
                 <div class="bg-white p-4 rounded-xl shadow border border-gray-200 space-y-2 text-sm">
                     <div class="grid grid-cols-2 gap-y-2">
-                        <p><strong>País:</strong> ${data.country || 'N/A'} (${data.countryCode || 'N/A'})</p>
-                        <p><strong>Región:</strong> ${data.regionName || 'N/A'} (${data.region || 'N/A'})</p>
-                        <p><strong>Ciudad:</strong> ${data.city || 'N/A'} (C. Postal: ${data.zip || 'N/A'})</p>
-                        <p><strong>Zona Horaria:</strong> ${data.timezone || 'N/A'}</p>
-                        <p class="col-span-2"><strong>Coordenadas:</strong> Latitud ${data.lat || 'N/A'}, Longitud ${data.lon || 'N/A'}</p>
-                        <p class="col-span-2"><strong>ISP/Proveedor:</strong> ${data.isp || 'N/A'}</p>
-                        <p class="col-span-2"><strong>Organización:</strong> ${data.org || 'N/A'}</p>
-                        <p class="col-span-2"><strong>AS (Sistema Autónomo):</strong> ${data.as || 'N/A'}</p>
+                        <p><strong>País:</strong> ${country || 'N/A'} (${countryCode || 'N/A'})</p>
+                        <p><strong>Región:</strong> ${regionName || 'N/A'} (${regionCode || 'N/A'})</p>
+                        <p><strong>Ciudad:</strong> ${city || 'N/A'} (C. Postal: ${zip || 'N/A'})</p>
+                        <p><strong>Zona Horaria:</strong> ${timezone || 'N/A'}</p>
+                        <p class="col-span-2"><strong>Coordenadas:</strong> Latitud ${lat || 'N/A'}, Longitud ${lon || 'N/A'}</p>
+                        <p class="col-span-2"><strong>ISP/Proveedor:</strong> ${isp || 'N/A'}</p>
+                        <p class="col-span-2"><strong>Organización:</strong> ${org || 'N/A'}</p>
+                        <p class="col-span-2"><strong>AS (Sistema Autónomo):</strong> ${as || 'N/A'}</p>
                     </div>
                 </div>
                 <p class="text-xs text-gray-400 mt-4 italic">La precisión de la geolocalización de IPs varía y a menudo solo apunta a la ciudad o región, no a la ubicación exacta.</p>
