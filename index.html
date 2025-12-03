@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Herramienta de Seguridad Multifunción</title>
+    <title>Herramienta de Seguridad Multifunción (6 en 1)</title>
     <!-- Carga de Tailwind CSS para el estilo -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -15,7 +15,7 @@
             background-color: #f7fafc; /* Gris muy claro */
         }
         .container-card {
-            max-width: 700px; /* Aumentado ligeramente para más espacio */
+            max-width: 800px; /* Más ancho para acomodar más pestañas */
         }
         /* Estilos para el indicador de carga */
         .loader {
@@ -43,29 +43,37 @@
     <div id="app" class="container-card w-full bg-white p-6 md:p-10 rounded-xl shadow-2xl border border-gray-200">
         <h1 class="text-3xl font-bold text-center text-gray-800 mb-2">
             <svg class="inline w-8 h-8 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944c-.752 0-1.492.1-2.203.292m1.536 2.016h-3.072m3.072 0a2 2 0 100 4 2 2 0 000-4zM12 21a9 9 0 100-18 9 9 0 000 18z"></path></svg>
-            Herramienta de Seguridad y Validación
+            Herramienta de Seguridad y Utilidades (6 en 1)
         </h1>
         <p class="text-center text-gray-500 mb-6">
-            Elige una opción para verificar información de seguridad y red.
+            Elige una opción para verificar información de seguridad, red y credenciales.
         </p>
 
         <!-- Selector de Pestañas -->
         <div class="flex flex-wrap justify-center mb-6 bg-gray-200 p-1 rounded-xl">
             <button id="tabEmail" onclick="changeTab('email')" 
-                    class="tab-button active flex-1 p-2 text-xs sm:text-sm font-semibold text-center rounded-lg transition duration-200 ease-in-out text-gray-700 hover:bg-green-500 hover:text-white min-w-[50%] sm:min-w-0">
-                📧 Brechas (Email)
+                    class="tab-button active flex-1 p-2 text-xs sm:text-sm font-semibold text-center rounded-lg transition duration-200 ease-in-out text-gray-700 hover:bg-green-500 hover:text-white min-w-[33%] sm:min-w-0">
+                📧 Brechas
             </button>
             <button id="tabPhone" onclick="changeTab('phone')" 
-                    class="tab-button flex-1 p-2 text-xs sm:text-sm font-semibold text-center rounded-lg transition duration-200 ease-in-out text-gray-700 hover:bg-green-500 hover:text-white min-w-[50%] sm:min-w-0">
-                📱 Validación (Teléfono)
+                    class="tab-button flex-1 p-2 text-xs sm:text-sm font-semibold text-center rounded-lg transition duration-200 ease-in-out text-gray-700 hover:bg-green-500 hover:text-white min-w-[33%] sm:min-w-0">
+                📱 Teléfono
             </button>
             <button id="tabDomain" onclick="changeTab('domain')" 
-                    class="tab-button flex-1 p-2 text-xs sm:text-sm font-semibold text-center rounded-lg transition duration-200 ease-in-out text-gray-700 hover:bg-green-500 hover:text-white min-w-[50%] sm:min-w-0">
-                🌐 Información (Dominio)
+                    class="tab-button flex-1 p-2 text-xs sm:text-sm font-semibold text-center rounded-lg transition duration-200 ease-in-out text-gray-700 hover:bg-green-500 hover:text-white min-w-[33%] sm:min-w-0">
+                🌐 Dominio
             </button>
             <button id="tabIP" onclick="changeTab('ip')" 
-                    class="tab-button flex-1 p-2 text-xs sm:text-sm font-semibold text-center rounded-lg transition duration-200 ease-in-out text-gray-700 hover:bg-green-500 hover:text-white min-w-[50%] sm:min-w-0">
-                📍 Geolocalización (IP)
+                    class="tab-button flex-1 p-2 text-xs sm:text-sm font-semibold text-center rounded-lg transition duration-200 ease-in-out text-gray-700 hover:bg-green-500 hover:text-white min-w-[33%] sm:min-w-0">
+                📍 IP Geoloc
+            </button>
+            <button id="tabDns" onclick="changeTab('dns')" 
+                    class="tab-button flex-1 p-2 text-xs sm:text-sm font-semibold text-center rounded-lg transition duration-200 ease-in-out text-gray-700 hover:bg-green-500 hover:text-white min-w-[33%] sm:min-w-0">
+                📡 DNS Lookup
+            </button>
+            <button id="tabPassword" onclick="changeTab('password')" 
+                    class="tab-button flex-1 p-2 text-xs sm:text-sm font-semibold text-center rounded-lg transition duration-200 ease-in-out text-gray-700 hover:bg-green-500 hover:text-white min-w-[33%] sm:min-w-0">
+                🔑 Contraseña
             </button>
         </div>
 
@@ -126,6 +134,73 @@
             </div>
         </div>
 
+        <!-- Pestaña: DNS Lookup -->
+        <div id="tabContentDns" data-tab-content="dns" class="hidden">
+            <div class="flex flex-col sm:flex-row gap-4 mb-6">
+                <input type="text" id="dnsInput" placeholder="Introduce el dominio (ej: ejemplo.com)"
+                       class="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 flex-grow"
+                       required>
+                <select id="dnsTypeSelect" 
+                        class="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 w-full sm:w-auto">
+                    <option value="A">A (Dirección IPv4)</option>
+                    <option value="AAAA">AAAA (Dirección IPv6)</option>
+                    <option value="MX">MX (Servidor de Correo)</option>
+                    <option value="TXT">TXT (Texto/Verificación)</option>
+                    <option value="CNAME">CNAME (Alias)</option>
+                    <option value="NS">NS (Servidor de Nombres)</option>
+                </select>
+                <button id="searchButtonDns" onclick="checkDnsRecords()"
+                        class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out flex items-center justify-center w-full sm:w-auto">
+                    <span id="buttonTextDns">Buscar Registros DNS</span>
+                    <div id="loaderDns" class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-6 w-6 hidden ml-2"></div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Pestaña: Contraseña (Generador/Fuerza) -->
+        <div id="tabContentPassword" data-tab-content="password" class="hidden">
+            <div class="space-y-6">
+                
+                <!-- Generador de Contraseña -->
+                <div class="p-6 bg-gray-50 rounded-xl border border-gray-200 shadow-inner">
+                    <h2 class="text-xl font-semibold text-gray-700 mb-4">Generador de Contraseñas Seguras</h2>
+                    <div class="flex flex-col md:flex-row gap-4 mb-4 items-center">
+                        <input type="number" id="passLength" value="16" min="8" max="64"
+                            class="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full md:w-20 text-center"
+                            title="Longitud">
+                        <label class="flex items-center space-x-2"><input type="checkbox" id="passUppercase" checked class="form-checkbox text-indigo-600 rounded"><span>Mayúsculas</span></label>
+                        <label class="flex items-center space-x-2"><input type="checkbox" id="passLowercase" checked class="form-checkbox text-indigo-600 rounded"><span>Minúsculas</span></label>
+                        <label class="flex items-center space-x-2"><input type="checkbox" id="passNumbers" checked class="form-checkbox text-indigo-600 rounded"><span>Números</span></label>
+                        <label class="flex items-center space-x-2"><input type="checkbox" id="passSymbols" checked class="form-checkbox text-indigo-600 rounded"><span>Símbolos</span></label>
+                    </div>
+                    <div class="flex gap-4">
+                        <button onclick="generatePassword()"
+                            class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out flex items-center justify-center">
+                            Generar Nueva
+                        </button>
+                        <input type="text" id="generatedPassword" readonly placeholder="Contraseña Generada"
+                            class="flex-grow p-3 border border-gray-300 rounded-lg bg-white font-mono text-gray-800">
+                        <button onclick="copyToClipboard('generatedPassword')" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-3 px-4 rounded-lg shadow-md transition duration-300 ease-in-out" title="Copiar">
+                            📋
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Evaluador de Fuerza -->
+                <div class="p-6 bg-gray-50 rounded-xl border border-gray-200 shadow-inner">
+                    <h2 class="text-xl font-semibold text-gray-700 mb-4">Evaluador de Fuerza de Contraseña</h2>
+                    <input type="password" id="passwordStrengthInput" placeholder="Introduce tu contraseña para verificar su fuerza"
+                        oninput="checkPasswordStrength()"
+                        class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 mb-4">
+                    <div id="strengthBar" class="h-2 rounded-full mb-2 bg-gray-300">
+                        <div id="strengthIndicator" class="h-2 rounded-full transition-all duration-500" style="width: 0%;"></div>
+                    </div>
+                    <p id="strengthText" class="text-sm font-semibold text-gray-600"></p>
+                </div>
+
+            </div>
+        </div>
+
         <!-- Área de Resultados -->
         <div id="results" class="space-y-4">
             <!-- Los resultados se inyectarán aquí -->
@@ -133,7 +208,7 @@
 
         <!-- Pie de página y Créditos -->
         <p class="text-xs text-gray-400 mt-8 text-center">
-            **Servicios externos gratuitos:** Brechas (XposedOrNot), Dominio (WhoisXMLAPI - solo validador), IP (IP-API). Teléfono (libphonenumber-js).
+            **Servicios externos gratuitos:** Brechas (XposedOrNot), Dominio (WhoisXMLAPI - solo validador), IP (IP-API), DNS (Google Public DNS). Teléfono y Contraseñas (Client-side JS).
         </p>
 
     </div>
@@ -142,8 +217,8 @@
         // --- CONSTANTES GLOBALES ---
         const XPOSED_API_URL = "https://exposedornot.com/api/v1/search";
         const IP_API_URL = "http://ip-api.com/json/";
-        // Usaremos el validador de WhoisXMLAPI para el dominio, que no necesita API Key
         const DOMAIN_API_URL = "https://www.whoisxmlapi.com/domain-name-availability/api/v1/lookup";
+        const GOOGLE_DNS_API_URL = "https://dns.google/resolve";
 
         // --- ESTADO DE LA APLICACIÓN ---
         let currentTab = 'email';
@@ -152,7 +227,7 @@
 
         /**
          * Cambia la pestaña visible y actualiza el estado de la aplicación.
-         * @param {string} tabName - 'email', 'phone', 'domain', o 'ip'.
+         * @param {string} tabName - 'email', 'phone', 'domain', 'ip', 'dns', o 'password'.
          */
         function changeTab(tabName) {
             currentTab = tabName;
@@ -188,7 +263,31 @@
             return s.charAt(0).toUpperCase() + s.slice(1);
         }
 
+        /**
+         * Copia el contenido de un elemento al portapapeles.
+         */
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            // Crea un input temporal para la selección
+            const tempInput = document.createElement('textarea');
+            tempInput.value = element.value || element.textContent; // Puede ser un input o un texto div
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            
+            try {
+                // Utiliza document.execCommand('copy') como fallback para entornos iFrame
+                document.execCommand('copy');
+                displayMessage('✅ ¡Copiado al portapapeles!', 'bg-blue-100 border-blue-400 text-blue-700');
+            } catch (err) {
+                console.error('Error al copiar:', err);
+                displayMessage('❌ Error al copiar al portapapeles.', 'bg-red-100 border-red-400 text-red-700');
+            }
+            document.body.removeChild(tempInput);
+        }
+
+        // ----------------------------------------------------------------------
         // --- FUNCIONES DE EMAIL (BRECHAS) ---
+        // ----------------------------------------------------------------------
         
         function isValidEmail(email) {
             const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -283,7 +382,9 @@
         }
 
 
+        // ----------------------------------------------------------------------
         // --- FUNCIONES DE TELÉFONO (VALIDACIÓN) ---
+        // ----------------------------------------------------------------------
 
         /**
          * Valida y analiza un número de teléfono usando libphonenumber-js.
@@ -329,7 +430,9 @@
             }
         }
 
+        // ----------------------------------------------------------------------
         // --- FUNCIONES DE DOMINIO (INFORMACIÓN) ---
+        // ----------------------------------------------------------------------
 
         function isValidDomain(domain) {
             // Regex simple para dominios: no permite protocolos, paths, ni @
@@ -355,7 +458,6 @@
             buttonText.textContent = 'Buscando...';
             loader.classList.remove('hidden');
 
-            // Usaremos la API de verificación de disponibilidad que es gratuita sin key
             const searchUrl = `${DOMAIN_API_URL}?domainName=${encodeURIComponent(domain)}`;
 
             try {
@@ -398,7 +500,6 @@
             `;
 
             if (!isAvailable) {
-                // Si está registrado, muestra información básica (si está disponible)
                 html += `
                     <h2 class="text-xl font-semibold text-gray-700 mb-4">Detalles Básicos del Registro:</h2>
                     <div class="bg-white p-4 rounded-xl shadow border border-gray-200 space-y-2">
@@ -420,10 +521,12 @@
         }
 
 
+        // ----------------------------------------------------------------------
         // --- FUNCIONES DE IP (GEOLOCALIZACIÓN) ---
+        // ----------------------------------------------------------------------
 
         function isValidIP(ip) {
-            // Regex simple para IPv4 y la mayoría de IPv6 (aunque IPv6 es más complejo)
+            // Regex simple para IPv4 y la mayoría de IPv6
             const ipv4 = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
             const ipv6 = /^([0-9a-fA-F]{1,4}:){7}([0-9a-fA-F]{1,4}|:)$/;
             return ip === '' || ipv4.test(ip) || ipv6.test(ip); // Permitir cadena vacía para la propia IP del usuario
@@ -447,7 +550,6 @@
             buttonText.textContent = 'Buscando...';
             loader.classList.remove('hidden');
 
-            // Si ip es vacío, la API de IP-API devuelve la IP del usuario.
             const searchUrl = `${IP_API_URL}${encodeURIComponent(ip)}`;
 
             try {
@@ -502,9 +604,215 @@
             resultsDiv.innerHTML = html;
         }
 
+        // ----------------------------------------------------------------------
+        // --- FUNCIONES DE DNS (DNS LOOKUP) ---
+        // ----------------------------------------------------------------------
+
+        async function checkDnsRecords() {
+            const dnsInput = document.getElementById('dnsInput');
+            const dnsTypeSelect = document.getElementById('dnsTypeSelect');
+            const domain = dnsInput.value.trim();
+            const recordType = dnsTypeSelect.value.trim();
+            const searchButton = document.getElementById('searchButtonDns');
+            const buttonText = document.getElementById('buttonTextDns');
+            const loader = document.getElementById('loaderDns');
+
+            document.getElementById('results').innerHTML = '';
+
+            if (!isValidDomain(domain)) {
+                displayMessage("⚠️ Por favor, introduce un dominio válido (ej: google.com).", 'bg-yellow-100 border-yellow-400 text-yellow-700');
+                return;
+            }
+
+            searchButton.disabled = true;
+            buttonText.textContent = 'Buscando...';
+            loader.classList.remove('hidden');
+
+            const searchUrl = `${GOOGLE_DNS_API_URL}?name=${encodeURIComponent(domain)}&type=${encodeURIComponent(recordType)}`;
+
+            try {
+                const response = await fetch(searchUrl, {
+                    method: 'GET',
+                    headers: { "Accept": "application/json" }
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.Status === 0) {
+                    displayDnsResult(domain, recordType, data);
+                } else if (data.Status === 3) {
+                     displayMessage(`⚠️ El dominio <span class="font-bold">${domain}</span> no existe o no se encontraron registros de tipo ${recordType}.`, 'bg-yellow-100 border-yellow-400 text-yellow-700');
+                } else {
+                    const errorMsg = data.Comment || `Error ${data.Status}: Error al consultar los registros DNS.`;
+                    displayMessage(`❌ Error: ${errorMsg}`, 'bg-red-100 border-red-400 text-red-700');
+                }
+
+            } catch (error) {
+                console.error("Error en la solicitud Fetch (DNS):", error);
+                displayMessage("❌ Error de red o en la solicitud. Revisa la consola para más detalles.", 'bg-red-100 border-red-400 text-red-700');
+            } finally {
+                searchButton.disabled = false;
+                buttonText.textContent = 'Buscar Registros DNS';
+                loader.classList.add('hidden');
+            }
+        }
+
+        function displayDnsResult(domain, recordType, data) {
+            const resultsDiv = document.getElementById('results');
+            const answers = data.Answer || [];
+
+            let html = `
+                <div class="bg-indigo-100 border-l-4 border-indigo-500 text-indigo-700 p-4 rounded-lg shadow-md mb-6" role="alert">
+                    <p class="font-bold text-lg">📡 Registros DNS Encontrados</p>
+                    <p class="text-sm">Dominio: <span class="font-extrabold">${domain}</span> (Tipo: ${recordType})</p>
+                </div>
+            `;
+
+            if (answers.length > 0) {
+                html += `
+                    <h2 class="text-xl font-semibold text-gray-700 mb-4">Respuestas (${answers.length}):</h2>
+                    <div class="bg-white p-4 rounded-xl shadow border border-gray-200 space-y-3">
+                        ${answers.map(answer => {
+                            const ttlText = answer.TTL ? `TTL: ${answer.TTL}s` : '';
+                            return `
+                                <div class="p-3 bg-gray-50 rounded-lg border border-gray-100">
+                                    <p class="font-mono text-gray-800 break-words">${answer.data}</p>
+                                    <p class="text-xs text-gray-500 mt-1">${answer.name} (${ttlText})</p>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+            } else {
+                html += `
+                    <p class="p-4 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-700 rounded-lg">
+                        No se encontraron registros de tipo ${recordType} para el dominio ${domain}.
+                    </p>
+                `;
+            }
+            resultsDiv.innerHTML = html;
+        }
+
+        // ----------------------------------------------------------------------
+        // --- FUNCIONES DE CONTRASEÑA (GENERACIÓN Y FUERZA) ---
+        // ----------------------------------------------------------------------
+        
+        const symbols = '!@#$%^&*()_+~`|}{[]\:;?><,./-=';
+        const lowercase = 'abcdefghijklmnopqrstuvwxyz';
+        const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const numbers = '0123456789';
+
+        /**
+         * Genera una contraseña aleatoria.
+         */
+        function generatePassword() {
+            const length = parseInt(document.getElementById('passLength').value);
+            const useUppercase = document.getElementById('passUppercase').checked;
+            const useLowercase = document.getElementById('passLowercase').checked;
+            const useNumbers = document.getElementById('passNumbers').checked;
+            const useSymbols = document.getElementById('passSymbols').checked;
+
+            let characters = '';
+            let password = '';
+
+            if (useUppercase) characters += uppercase;
+            if (useLowercase) characters += lowercase;
+            if (useNumbers) characters += numbers;
+            if (useSymbols) characters += symbols;
+            
+            // Si no se selecciona ningún tipo de caracter, se usa minúsculas por defecto.
+            if (characters.length === 0) {
+                characters = lowercase;
+                document.getElementById('passLowercase').checked = true;
+            }
+
+            for (let i = 0; i < length; i++) {
+                const randomIndex = Math.floor(Math.random() * characters.length);
+                password += characters.charAt(randomIndex);
+            }
+
+            document.getElementById('generatedPassword').value = password;
+            // Después de generar, evaluamos su fuerza
+            checkPasswordStrength(password);
+        }
+
+        /**
+         * Evalúa la fuerza de una contraseña (lógica simple de puntuación).
+         */
+        function checkPasswordStrength(inputPass = null) {
+            const password = inputPass !== null ? inputPass : document.getElementById('passwordStrengthInput').value;
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '';
+
+            if (password.length === 0) {
+                document.getElementById('strengthIndicator').style.width = '0%';
+                document.getElementById('strengthIndicator').className = 'h-2 rounded-full transition-all duration-500';
+                document.getElementById('strengthText').textContent = 'Introduce una contraseña para evaluar.';
+                return;
+            }
+
+            let score = 0;
+            // Criterios de puntuación
+            if (password.length >= 8) score += 10;
+            if (password.length >= 12) score += 15;
+            if (password.length >= 16) score += 20;
+
+            const hasLowercase = /[a-z]/.test(password);
+            const hasUppercase = /[A-Z]/.test(password);
+            const hasNumber = /\d/.test(password);
+            const hasSymbol = /[!@#$%^&*()_+~`|}{[\]\\:;"'?/.,-=`]/.test(password);
+
+            if (hasLowercase) score += 10;
+            if (hasUppercase) score += 10;
+            if (hasNumber) score += 10;
+            if (hasSymbol) score += 10;
+
+            // Variedad
+            let characterTypes = 0;
+            if (hasLowercase) characterTypes++;
+            if (hasUppercase) characterTypes++;
+            if (hasNumber) characterTypes++;
+            if (hasSymbol) characterTypes++;
+            score += (characterTypes - 1) * 5;
+
+            // Asegurar que el score no exceda 100
+            score = Math.min(score, 100);
+
+            let strengthText = '';
+            let indicatorClass = '';
+            let textColor = '';
+
+            if (score < 30) {
+                strengthText = 'Muy Débil. Necesita más longitud y variedad.';
+                indicatorClass = 'bg-red-500';
+                textColor = 'text-red-600';
+            } else if (score < 60) {
+                strengthText = 'Débil. Añade mayúsculas, números y/o símbolos.';
+                indicatorClass = 'bg-orange-400';
+                textColor = 'text-orange-600';
+            } else if (score < 80) {
+                strengthText = 'Aceptable. Intenta que sea más larga (más de 12 caracteres).';
+                indicatorClass = 'bg-yellow-400';
+                textColor = 'text-yellow-600';
+            } else if (score < 95) {
+                strengthText = 'Fuerte. ¡Bien hecho!';
+                indicatorClass = 'bg-green-500';
+                textColor = 'text-green-600';
+            } else {
+                strengthText = 'Excelente. Prácticamente inquebrantable.';
+                indicatorClass = 'bg-green-700';
+                textColor = 'text-green-700';
+            }
+
+            document.getElementById('strengthIndicator').style.width = `${score}%`;
+            document.getElementById('strengthIndicator').className = `h-2 rounded-full transition-all duration-500 ${indicatorClass}`;
+            document.getElementById('strengthText').innerHTML = `Fuerza: <span class="${textColor}">${strengthText}</span> (${score}%)`;
+        }
+
         // Inicializar la aplicación al cargar
         document.addEventListener('DOMContentLoaded', () => {
             changeTab('email'); // Asegura que la pestaña de email esté activa por defecto
+            checkPasswordStrength(); // Inicializa el chequeo de fuerza al cargar
         });
     </script>
 </body>
