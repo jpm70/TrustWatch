@@ -227,9 +227,11 @@
         // --- FUNCIONES DE UTILIDAD GENERAL ---
 
         /**
-         * Función auxiliar para capitalizar la primera letra de una cadena.
+         * Función auxiliar para capitalizar la primera letra de una cadena, manejando acrónimos.
+         * CORRECCIÓN: Asegura que 'ip' se convierta en 'IP' para que coincida con el ID del DOM.
          */
         function capitalize(s) {
+            if (s.toLowerCase() === 'ip') return 'IP';
             return s.charAt(0).toUpperCase() + s.slice(1);
         }
 
@@ -238,6 +240,7 @@
          * @param {string} tabName - 'email', 'phone', 'domain', 'ip', 'dns', o 'password'.
          */
         function changeTab(tabName) {
+            console.log(`[DEBUG] Intentando cambiar a la pestaña: ${tabName}`);
             currentTab = tabName;
             
             // 1. Ocultar todos los contenidos y desactivar botones
@@ -250,20 +253,21 @@
             }
 
             // 2. Mostrar contenido y activar el botón correcto
-            // Se añaden comprobaciones de nulidad para evitar el 'TypeError: ... is null'
-            const contentDiv = document.getElementById(`tabContent${capitalize(tabName)}`);
-            const buttonEl = document.getElementById(`tab${capitalize(tabName)}`);
+            const capitalizedName = capitalize(tabName); // Usa la función corregida
+            const contentDiv = document.getElementById(`tabContent${capitalizedName}`);
+            const buttonEl = document.getElementById(`tab${capitalizedName}`);
 
             if (contentDiv) {
                 contentDiv.classList.remove('hidden');
+                console.log(`[DEBUG] Pestaña ${tabName} mostrada. ID del contenido: tabContent${capitalizedName}`);
             } else {
-                console.warn(`[DOM Warning] No se encontró el contenido para la pestaña: tabContent${capitalize(tabName)}`);
+                console.warn(`[DOM Warning] No se encontró el contenido para la pestaña: tabContent${capitalizedName}`);
             }
             
             if (buttonEl) {
                 buttonEl.classList.add('active');
             } else {
-                console.warn(`[DOM Warning] No se encontró el botón para la pestaña: tab${capitalize(tabName)}`);
+                console.warn(`[DOM Warning] No se encontró el botón para la pestaña: tab${capitalizedName}`);
             }
         }
 
@@ -558,7 +562,7 @@
 
             } catch (error) {
                 console.error("Error en la solicitud Fetch (IP):", error);
-                // **CORRECCIÓN:** Mensaje de error más explícito para NetworkError/CORS.
+                // Mensaje de error más explícito para NetworkError/CORS.
                 displayMessage(`❌ Error de Conexión. Es probable que la API de geolocalización esté bloqueada por las políticas de seguridad del navegador o el entorno de sandbox (CORS).`, 'bg-red-100 border-red-400 text-red-700');
             } finally {
                 if (searchButton) searchButton.disabled = false;
