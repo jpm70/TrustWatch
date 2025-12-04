@@ -1,0 +1,10 @@
+{
+  "name": "proxy-serverless",
+  "version": "1.0.0",
+  "description": "Proxy for external API to solve CORS",
+  "main": "api/breaches.js",
+  "dependencies": {
+    "node-fetch": "3.3.2" 
+    // Versión 3.x de node-fetch para ser compatible con el fetch nativo.
+  }
+}
