@@ -1,52 +1,49 @@
-// api/breaches.js (Función Serverless para Vercel/Netlify)
+// api/breaches.js (Código CORREGIDO para Vercel)
 
-import fetch from 'node-fetch'; 
+// 🛑 IMPORTANTE: Eliminamos 'import fetch from "node-fetch";'
+// y usamos el 'fetch' nativo de Node.js, que Vercel soporta.
 
-// La API real de brechas. Esta URL solo se usa en el backend, no en el navegador.
+// La API real de brechas.
 const XPOSED_API_URL = "https://exposedornot.com/api/v1/search";
 
 export default async (req, res) => {
-    // 1. Obtener el email del parámetro de la URL
-    const { email } = req.query; 
-
+    
     // =======================================================
-    // 🛑 AÑADIDO CLAVE: Encabezados CORS y manejo de OPTIONS
+    // 🛑 Encabezados CORS y manejo de OPTIONS
     // =======================================================
-    res.setHeader('Access-Control-Allow-Origin', '*'); // Permite que cualquier dominio acceda (incluyendo GitHub Pages)
+    res.setHeader('Access-Control-Allow-Origin', '*'); // Permitir acceso desde cualquier origen
     res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
     if (req.method === 'OPTIONS') {
-        // Responder a la petición "preflight" del navegador
+        // Manejar la petición "preflight"
         return res.status(200).end();
     }
     // =======================================================
+    
+    const { email } = req.query; 
 
-    if (!email) {
-        // Devolver un error si falta el email
-        return res.status(400).json({ error: "Missing email parameter" });
-    }
+    if (!email) {
+        return res.status(400).json({ error: "Missing email parameter" });
+    }
 
-    // ... (el resto del código se mantiene igual)
+    const searchUrl = `${XPOSED_API_URL}/${encodeURIComponent(email)}`;
 
-    const searchUrl = `${XPOSED_API_URL}/${encodeURIComponent(email)}`;
+    try {
+        // Usamos el fetch global (nativo) de Node
+        const response = await fetch(searchUrl, {
+            method: 'GET',
+            headers: { 
+                "Accept": "application/json",
+            }
+        });
+        
+        const data = await response.json();
+        // Devolvemos el status code que la API real nos dio (200 o 404, etc.)
+        res.status(response.status).json(data);
 
-    try {
-        // 2. Hacer la petición a la API de Brechas desde el servidor (Proxy)
-        const response = await fetch(searchUrl, {
-            method: 'GET',
-            headers: { 
-                "Accept": "application/json",
-                // Si la API requiriera una API KEY de servidor, iría aquí
-            }
-        });
-        
-        // 3. Devolver el JSON (o el error) al cliente
-        const data = await response.json();
-        res.status(response.status).json(data);
-
-    } catch (error) {
-        console.error("Proxy Error:", error);
-        res.status(500).json({ error: "Internal Proxy Error while fetching data" });
-    }
+    } catch (error) {
+        console.error("Proxy Runtime Error:", error);
+        res.status(500).json({ error: "Internal Proxy Error while executing function." });
+    }
 };
