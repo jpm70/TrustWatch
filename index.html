@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Herramienta de Seguridad y Utilidades (6 en 1)</title>
+    <title>Herramienta de Seguridad y Utilidades (7 en 1)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/libphonenumber-js@1.11.3/bundle/libphonenumber-js.min.js"></script>
@@ -13,7 +13,7 @@
             background-color: #f7fafc; /* Gris muy claro */
         }
         .container-card {
-            max-width: 800px; /* Más ancho para acomodar más pestañas */
+            max-width: 900px; /* Más ancho para acomodar 7 pestañas */
         }
         /* Estilos para el indicador de carga */
         .loader {
@@ -40,7 +40,7 @@
     <div id="app" class="container-card w-full bg-white p-6 md:p-10 rounded-xl shadow-2xl border border-gray-200">
         <h1 class="text-3xl font-bold text-center text-gray-800 mb-2">
             <svg class="inline w-8 h-8 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944c-.752 0-1.492.1-2.203.292m1.536 2.016h-3.072m3.072 0a2 2 0 100 4 2 2 0 000-4zM12 21a9 9 0 100-18 9 9 0 000 18z"></path></svg>
-            Herramienta de Seguridad y Utilidades (6 en 1)
+            Herramienta de Seguridad y Utilidades (7 en 1)
         </h1>
         <p class="text-center text-gray-500 mb-6">
             Elige una opción para verificar información de seguridad, red y credenciales.
@@ -70,7 +70,12 @@
                     class="tab-button flex-1 p-2 text-xs sm:text-sm font-semibold text-center rounded-lg transition duration-200 ease-in-out text-gray-700 hover:bg-green-500 hover:text-white min-w-[33%] sm:min-w-0">
                 🔑 Contraseña
             </button>
+            <button id="tabSafe" onclick="changeTab('safe')" 
+                    class="tab-button flex-1 p-2 text-xs sm:text-sm font-semibold text-center rounded-lg transition duration-200 ease-in-out text-gray-700 hover:bg-green-500 hover:text-white min-w-[33%] sm:min-w-0">
+                🛡️ Seguridad Web
+            </button>
         </div>
+        
         <div id="tabContentEmail" data-tab-content="email">
             <div class="flex flex-col sm:flex-row gap-4 mb-6">
                 <input type="email" id="emailInput" placeholder="Introduce email a comprobar (ej: usuario@dominio.com)"
@@ -95,7 +100,7 @@
                 </button>
             </div>
         </div>
-                <div id="tabContentDomain" data-tab-content="domain" class="hidden">
+        <div id="tabContentDomain" data-tab-content="domain" class="hidden">
             <div class="flex flex-col sm:flex-row gap-4 mb-6">
                 <input type="text" id="domainInput" placeholder="Introduce el dominio (ej: google.com)"
                        class="flex-grow p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
@@ -107,7 +112,7 @@
                 </button>
             </div>
         </div>
-                <div id="tabContentIP" data-tab-content="ip" class="hidden">
+        <div id="tabContentIP" data-tab-content="ip" class="hidden">
             <div class="flex flex-col sm:flex-row gap-4 mb-6">
                 <input type="text" id="ipInput" placeholder="Introduce IP (ej: 8.8.8.8) o déjalo vacío para la tuya"
                        class="flex-grow p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
@@ -141,7 +146,7 @@
         </div>
         <div id="tabContentPassword" data-tab-content="password" class="hidden">
             <div class="space-y-6">
-                                <div class="p-6 bg-gray-50 rounded-xl border border-gray-200 shadow-inner">
+                <div class="p-6 bg-gray-50 rounded-xl border border-gray-200 shadow-inner">
                     <h2 class="text-xl font-semibold text-gray-700 mb-4">Generador de Contraseñas Seguras</h2>
                     <div class="flex flex-col md:flex-row gap-4 mb-4 items-center">
                         <input type="number" id="passLength" value="16" min="8" max="64"
@@ -176,10 +181,23 @@
                 </div>
             </div>
         </div>
+
+        <div id="tabContentSafe" data-tab-content="safe" class="hidden">
+            <div class="flex flex-col sm:flex-row gap-4 mb-6">
+                <input type="url" id="urlInput" placeholder="Introduce la URL para comprobar (ej: https://tienda-falsa.com)"
+                       class="flex-grow p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                       required>
+                <button id="searchButtonSafe" onclick="checkSafeUrl()"
+                        class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out flex items-center justify-center">
+                    <span id="buttonTextSafe">Verificar URL</span>
+                    <div id="loaderSafe" class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-6 w-6 hidden ml-2"></div>
+                </button>
+            </div>
+        </div>
         <div id="results" class="space-y-4">
             </div>
         <p class="text-xs text-gray-400 mt-8 text-center">
-            **Servicios externos gratuitos:** Brechas (Proxy Vercel/Netlify), IP (ipapi.co), DNS (Google Public DNS). Teléfono y Contraseñas (Client-side JS).
+            **Servicios externos gratuitos:** Brechas (Proxy Vercel), Seguridad Web (Proxy Vercel/Google Safe Browsing), IP (ipapi.co), DNS (Google Public DNS). Teléfono y Contraseñas (Client-side JS).
             <span class="font-bold text-red-400">La disponibilidad de Dominio se verifica solo a nivel de formato por las restricciones de CORS/API Key.</span>
         </p>
     </div>
@@ -187,9 +205,10 @@
         // --- CONSTANTES GLOBALES ---
         
         // ¡CAMBIO CLAVE! URL del proxy serverless para evitar el error CORS.
-        // **DEBES CAMBIAR ESTO POR TU DOMINIO REAL DE VERSEL/NETLIFY**
         const PROXY_BREACHES_URL = "https://trust-watch.vercel.app/api/breaches?email=";
-        
+        // ✅ NUEVO: URL del proxy para la comprobación de Navegación Segura
+        const PROXY_SAFE_URL = "https://trust-watch.vercel.app/api/safebrowsing"; 
+
         const IP_API_URL = "https://ipapi.co/"; 
         const GOOGLE_DNS_API_URL = "https://dns.google/resolve";
         // --- ESTADO DE LA APLICACIÓN ---
@@ -206,7 +225,7 @@
 
         /**
          * Cambia la pestaña visible y actualiza el estado de la aplicación.
-         * @param {string} tabName - 'email', 'phone', 'domain', 'ip', 'dns', o 'password'.
+         * @param {string} tabName - 'email', 'phone', 'domain', 'ip', 'dns', 'password' o 'safe'.
          */
         function changeTab(tabName) {
             console.log(`[DEBUG] Intentando cambiar a la pestaña: ${tabName}`);
@@ -222,7 +241,8 @@
             }
 
             // 2. Mostrar contenido y activar el botón correcto
-            const capitalizedName = capitalize(tabName); // Usa la función corregida
+            // Se debe manejar 'Safe' y 'safe'
+            const capitalizedName = (tabName === 'safe') ? 'Safe' : capitalize(tabName); 
             const contentDiv = document.getElementById(`tabContent${capitalizedName}`);
             const buttonEl = document.getElementById(`tab${capitalizedName}`);
             if (contentDiv) {
@@ -822,6 +842,98 @@
                     ${messageHtml}
                 </div>
             `;
+        }
+
+
+        // ----------------------------------------------------------------------
+        // --- FUNCIONES DE SEGURIDAD WEB (GOOGLE SAFE BROWSING) ---
+        // ----------------------------------------------------------------------
+
+        function isValidUrl(url) {
+            try {
+                // Utiliza la API nativa de URL para una verificación estricta
+                new URL(url);
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        async function checkSafeUrl() {
+            const urlInput = document.getElementById('urlInput');
+            const url = urlInput ? urlInput.value.trim() : '';
+            const searchButton = document.getElementById('searchButtonSafe');
+            const buttonText = document.getElementById('buttonTextSafe');
+            const loader = document.getElementById('loaderSafe');
+            document.getElementById('results').innerHTML = '';
+
+            if (!isValidUrl(url)) {
+                displayMessage("⚠️ Por favor, introduce una URL válida (ej: https://www.tienda.com).", 'bg-yellow-100 border-yellow-400 text-yellow-700');
+                return;
+            }
+            
+            if (searchButton) searchButton.disabled = true;
+            if (buttonText) buttonText.textContent = 'Verificando...';
+            if (loader) loader.classList.remove('hidden');
+
+            try {
+                // APUNTA AL PROXY SERVERLESS (api/safebrowsing.js)
+                const response = await fetch(PROXY_SAFE_URL, {
+                    method: 'POST', // Usamos POST para enviar la URL en el cuerpo
+                    headers: { 
+                        "Content-Type": "application/json",
+                        "Accept": "application/json" 
+                    },
+                    body: JSON.stringify({ url: url }) // Enviamos la URL en el cuerpo de la petición
+                });
+                const data = await response.json();
+
+                if (response.ok && data.status === "SAFE") {
+                    // CASO 1: URL Segura
+                    displayMessage(`✅ ¡URL Segura! La URL <span class="font-bold">${url}</span> NO fue clasificada como maliciosa por Google Safe Browsing.`, 'bg-green-100 border-green-400 text-green-700');
+                } else if (response.ok && data.status === "DANGEROUS") {
+                    // CASO 2: URL Peligrosa
+                    displayDangerousUrl(url, data.matches);
+                } else {
+                    // CASO 3: Error del Proxy o de la API de Google
+                    const message = data.error || `Error ${response.status}: Error en la verificación de seguridad.`;
+                    displayMessage(`❌ Error: ${message}`, 'bg-red-100 border-red-400 text-red-700');
+                }
+            } catch (error) {
+                console.error("Error en la solicitud Fetch (SafeBrowsing/Proxy):", error);
+                displayMessage(`❌ Error de Conexión. Fallo al contactar el servicio Proxy para seguridad web.`, 'bg-red-100 border-red-400 text-red-700');
+            } finally {
+                if (searchButton) searchButton.disabled = false;
+                if (buttonText) buttonText.textContent = 'Verificar URL';
+                if (loader) loader.classList.add('hidden');
+            }
+        }
+
+        function displayDangerousUrl(url, matches) {
+            const resultsDiv = document.getElementById('results');
+            let threats = matches.map(match => `
+                <li class="font-medium text-red-700">
+                    Tipo de Amenaza: <strong>${capitalize(match.threatType.replace(/_/g, ' ').toLowerCase())}</strong> 
+                    (Plataforma: ${match.platformType.replace(/_/g, ' ')})
+                </li>
+            `).join('');
+
+            let html = `
+                <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg shadow-md mb-6" role="alert">
+                    <p class="font-bold text-lg">🚨 ¡ATENCIÓN! La URL <span class="font-extrabold">${url}</span> es PELIGROSA.</p>
+                    <p class="text-sm">Google Safe Browsing ha clasificado este sitio como malicioso o de ingeniería social (phishing). **NO accedas ni introduzcas credenciales.**</p>
+                </div>
+                <h2 class="text-xl font-semibold text-gray-700 mb-4">Detalles de la Amenaza:</h2>
+                <div class="bg-white p-4 rounded-xl shadow border border-gray-200">
+                    <ul class="list-disc list-inside space-y-2 text-gray-800">
+                        ${threats}
+                    </ul>
+                </div>
+                <p class="text-sm text-gray-500 mt-4">
+                    **Clasificaciones:** MALWARE (Software malicioso), SOCIAL_ENGINEERING (Phishing/Engaño), UNWANTED_SOFTWARE (Software no deseado).
+                </p>
+            `;
+            if (resultsDiv) resultsDiv.innerHTML = html;
         }
 
 
