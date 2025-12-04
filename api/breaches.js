@@ -1,73 +1,62 @@
-// api/breaches.js (Versión Final Corregida y Robustecida)
+// api/breaches.js (Versión para Have I Been Pwned - HIBP)
 
-// La URL base de la API externa.
-const XPOSED_API_URL = "https://exposedornot.com/api/v1/search";
+// La URL de la API de HIBP (Requiere que el email esté en el PATH)
+const HIBP_API_URL = "https://haveibeenpwned.com/api/v3/breachedaccount/";
 
 export default async (req, res) => {
     
-    // =======================================================
-    // 1. Configuración CORS y manejo de peticiones OPTIONS
-    // =======================================================
+    // ... (Configuración CORS y manejo de OPTIONS: Esto se mantiene igual)
     res.setHeader('Access-Control-Allow-Origin', '*'); 
     res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.setHeader('Content-Type', 'application/json'); // Aseguramos que la respuesta es JSON
 
     if (req.method === 'OPTIONS') {
         return res.status(200).end();
     }
     
-    // 2. Obtener el email del parámetro de consulta
     const { email } = req.query; 
 
     if (!email) {
         return res.status(400).json({ error: "Missing email parameter" });
     }
 
-    // 🛑 CORRECCIÓN CLAVE: Usamos el parámetro de consulta '?email='
-    // para resolver el error 404.
-    const searchUrl = `${XPOSED_API_URL}?email=${encodeURIComponent(email)}`; 
+    // 🛑 CAMBIO CLAVE: Construcción de la URL de HIBP
+    const searchUrl = `${HIBP_API_URL}${encodeURIComponent(email)}?truncateResponse=true`; 
 
     try {
-        // 3. Petición al API externo (desde Vercel)
+        // Petición al API de HIBP (desde Vercel)
         const response = await fetch(searchUrl, {
             method: 'GET',
             headers: { 
+                "User-Agent": "TrustWatch-App-Proxy", // HIBP requiere un User-Agent identificable
                 "Accept": "application/json",
             }
         });
         
+        // La API de HIBP usa 404 para NO ENCONTRADO (lo cual es un ÉXITO)
+        if (response.status === 404) {
+             return res.status(200).json({ status: 404, message: "Email not found in breaches." });
+        }
+        
         const responseBody = await response.text(); 
         
-        // 4. Verificación de respuesta exitosa (response.ok = código 200-299)
-        if (!response.ok) {
-            // Si la API externa devuelve un error HTTP (4xx, 5xx),
-            // lo devolvemos al frontend con un código 502 (Bad Gateway)
-            console.error(`External API returned status ${response.status}: ${responseBody.substring(0, 100)}`);
-            
+        if (response.status !== 200) {
+            // Si devuelve cualquier otro código (ej. 400, 403, 429), es un error real.
+            console.error(`HIBP API returned status ${response.status}`);
             return res.status(502).json({ 
-                error: `External API returned status ${response.status}.`,
+                error: `HIBP API returned status ${response.status}.`,
                 external_message: responseBody.substring(0, 500)
             });
         }
         
-        // 5. Intentar parsear el JSON
-        let data;
-        try {
-            data = JSON.parse(responseBody);
-        } catch (jsonError) {
-             // Fallo en el parseo JSON
-             console.error("JSON Parsing Error:", jsonError);
-             return res.status(500).json({ 
-                error: "Proxy received valid status but invalid JSON response.",
-                raw_response_start: responseBody.substring(0, 500)
-            });
-        }
+        // Intentar parsear el JSON (solo si el status es 200)
+        let data = JSON.parse(responseBody);
         
-        // 6. Devolver la respuesta exitosa al frontend
-        res.status(response.status).json(data);
+        // Devolver la respuesta exitosa al frontend
+        res.status(200).json(data);
 
     } catch (error) {
-        // Fallo de red (timeout, DNS, SSL)
         console.error("Proxy Network/Execution Error:", error);
         res.status(500).json({ error: "Proxy failed to execute the request or network error occurred." });
     }
