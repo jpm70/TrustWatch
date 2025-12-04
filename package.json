@@ -5,6 +5,6 @@
   "main": "api/breaches.js",
   "dependencies": {
     "node-fetch": "3.3.2" 
-    // Versión 3.x de node-fetch para ser compatible con el fetch nativo.
+    
   }
 }
