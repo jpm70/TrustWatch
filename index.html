@@ -179,14 +179,17 @@
         <div id="results" class="space-y-4">
             </div>
         <p class="text-xs text-gray-400 mt-8 text-center">
-            **Servicios externos gratuitos:** Brechas (XposedOrNot), IP (ipapi.co), DNS (Google Public DNS). Teléfono y Contraseñas (Client-side JS).
+            **Servicios externos gratuitos:** Brechas (Proxy Vercel/Netlify), IP (ipapi.co), DNS (Google Public DNS). Teléfono y Contraseñas (Client-side JS).
             <span class="font-bold text-red-400">La disponibilidad de Dominio se verifica solo a nivel de formato por las restricciones de CORS/API Key.</span>
         </p>
     </div>
     <script>
         // --- CONSTANTES GLOBALES ---
-        const XPOSED_API_URL = "https://exposedornot.com/api/v1/search";
-        // CAMBIO CRÍTICO: Se cambia de ipwhois.app a ipapi.co (más confiable para entornos CORS restringidos)
+        
+        // ¡CAMBIO CLAVE! URL del proxy serverless para evitar el error CORS.
+        // **DEBES CAMBIAR ESTO POR TU DOMINIO REAL DE VERSEL/NETLIFY**
+        const PROXY_BREACHES_URL = "https://[TU-DOMINIO-VERCEL].vercel.app/api/breaches?email=";
+        
         const IP_API_URL = "https://ipapi.co/"; 
         const GOOGLE_DNS_API_URL = "https://dns.google/resolve";
         // --- ESTADO DE LA APLICACIÓN ---
@@ -302,7 +305,8 @@
             if (buttonText) buttonText.textContent = 'Buscando...';
             if (loader) loader.classList.remove('hidden');
 
-            const searchUrl = `${XPOSED_API_URL}/${encodeURIComponent(email)}`;
+            // APUNTA AL PROXY SERVERLESS PARA EVITAR CORS
+            const searchUrl = `${PROXY_BREACHES_URL}${encodeURIComponent(email)}`;
             
             try {
                 const response = await fetch(searchUrl, {
@@ -314,17 +318,23 @@
                 if (response.status === 200) {
                     if (data.count > 0 && data.breaches && data.breaches.length > 0) {
                         displayBreaches(email, data.breaches);
-                    } else {
+                    } else if (data.status === 404) {
+                        // Manejo si el proxy devuelve un 404 (o el API real)
+                        displayMessage(`🎉 ¡Buenas noticias! El correo electrónico <span class="font-bold">${email}</span> NO ha sido encontrado en ninguna brecha conocida por XposedOrNot.`, 'bg-green-100 border-green-400 text-green-700');
+                    }
+                     else {
+                         // Manejo general si no hay brechas y el status es 200
                         displayMessage(`🎉 ¡Buenas noticias! El correo electrónico <span class="font-bold">${email}</span> NO ha sido encontrado en ninguna brecha conocida por XposedOrNot.`, 'bg-green-100 border-green-400 text-green-700');
                     }
                 } else {
-                    const message = data.message || `Error ${response.status}: Ha ocurrido un error al consultar la API.`;
+                    // Si el proxy falla o devuelve otro error (500, etc.)
+                    const message = data.error || data.message || `Error ${response.status}: Ha ocurrido un error al consultar el proxy de la API.`;
                     displayMessage(`❌ Error: ${message}`, 'bg-red-100 border-red-400 text-red-700');
                 }
             } catch (error) {
-                console.error("Error en la solicitud Fetch (Email):", error);
-                // Mensaje de error más descriptivo sobre el bloqueo de red
-                displayMessage(`❌ Error de Conexión. Es probable que la API de brechas esté bloqueada por las políticas de seguridad del navegador o el entorno de sandbox (CORS).`, 'bg-red-100 border-red-400 text-red-700');
+                console.error("Error en la solicitud Fetch (Email/Proxy):", error);
+                // Mensaje de error más descriptivo sobre el fallo del proxy
+                displayMessage(`❌ Error de Conexión. Fallo al contactar el servicio Proxy. Verifica la URL de PROXY_BREACHES_URL o el despliegue del proxy.`, 'bg-red-100 border-red-400 text-red-700');
             } finally {
                 if (searchButton) searchButton.disabled = false;
                 if (buttonText) buttonText.textContent = 'Comprobar Brechas';
@@ -507,7 +517,7 @@
             if (buttonText) buttonText.textContent = 'Buscando...';
             if (loader) loader.classList.remove('hidden');
 
-            // Nueva API: ipapi.co. Si se proporciona una IP, se añade a la URL/json. Si no, usa /json.
+            // API: ipapi.co. Si se proporciona una IP, se añade a la URL/json. Si no, usa /json.
             const searchUrl = ip ? `${IP_API_URL}${encodeURIComponent(ip)}/json/` : `${IP_API_URL}json/`; 
              
             try {
